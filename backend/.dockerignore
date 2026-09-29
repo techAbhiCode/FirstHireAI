@@ -1,0 +1,26 @@
+# Dependencies
+**/node_modules
+node_modules
+
+# Environment variables & secrets (CRITICAL - NEVER bake into images)
+**/.env
+**/.env*
+*.env
+.env
+**/*.key
+**/*.pem
+**/serviceAccountKey*.json
+serviceAccountKey*.json
+
+# Logs & temp files
+**/npm-debug.log*
+**/*.log
+**/.DS_Store
+
+# Git
+**/.git
+**/.gitignore
+
+# Local runtime uploads
+**/uploads/*
+!**/uploads/.gitkeep

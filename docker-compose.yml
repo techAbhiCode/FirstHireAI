@@ -1,0 +1,127 @@
+services:
+  redis:
+    image: redis:alpine
+    container_name: firsthire-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - firsthire-network
+
+  gateway:
+    build:
+      context: ./backend
+      dockerfile: ./gateway/Dockerfile
+    image: techabhicode/gateway:latest
+    container_name: firsthire-gateway
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/gateway/.env
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - firsthire-network
+
+  auth-service:
+    build:
+      context: ./backend
+      dockerfile: ./services/auth-service/Dockerfile
+    image: techabhicode/auth-service:latest
+    container_name: firsthire-auth-service
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./backend/services/auth-service/.env
+    volumes:
+      # Mount Firebase service account key at runtime so it is NEVER baked into the Docker Hub image
+      - ./backend/services/auth-service/serviceAccountKey.json:/app/services/auth-service/serviceAccountKey.json:ro
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - firsthire-network
+
+  billing-service:
+    build:
+      context: ./backend
+      dockerfile: ./services/billing-service/Dockerfile
+    image: techabhicode/billing-service:latest
+    container_name: firsthire-billing-service
+    ports:
+      - "8005:8005"
+    env_file:
+      - ./backend/services/billing-service/.env
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - firsthire-network
+
+  interview-service:
+    build:
+      context: ./backend
+      dockerfile: ./services/interview-service/Dockerfile
+    image: techabhicode/interview-service:latest
+    container_name: firsthire-interview-service
+    ports:
+      - "8002:8002"
+    env_file:
+      - ./backend/services/interview-service/.env
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - firsthire-network
+
+  resume-service:
+    build:
+      context: ./backend
+      dockerfile: ./services/resume-service/Dockerfile
+    image: techabhicode/resume-service:latest
+    container_name: firsthire-resume-service
+    ports:
+      - "8003:8003"
+    env_file:
+      - ./backend/services/resume-service/.env
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - firsthire-network
+
+  roadmap-service:
+    build:
+      context: ./backend
+      dockerfile: ./services/roadmap-service/Dockerfile
+    image: techabhicode/roadmap-service:latest
+    container_name: firsthire-roadmap-service
+    ports:
+      - "8004:8004"
+    env_file:
+      - ./backend/services/roadmap-service/.env
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - firsthire-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_RAZORPAY_KEY_ID=${VITE_RAZORPAY_KEY_ID}
+        - VITE_FIREBASE_APIKEY=${VITE_FIREBASE_APIKEY}
+    image: techabhicode/frontend:latest
+    container_name: firsthire-frontend
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    networks:
+      - firsthire-network
+
+networks:
+  firsthire-network:
+    driver: bridge
