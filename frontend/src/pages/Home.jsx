@@ -25,7 +25,7 @@ export default function Home({ user, setUser }) {
             <GiArtificialHive size={15} color="white" />
           </div>
           <span className="font-extrabold text-base tracking-tight text-[#0A0A0A]">
-            Fresher.AI
+            FirstHire.AI
           </span>
         </div>
 
