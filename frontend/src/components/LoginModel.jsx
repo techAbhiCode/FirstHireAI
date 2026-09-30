@@ -1,4 +1,4 @@
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signInWithRedirect } from "firebase/auth";
 import axios from "axios";
 import { auth, provider } from "../utils/firebase";
 import { FcGoogle } from "react-icons/fc";
@@ -20,7 +20,18 @@ export function LoginModal({ onClose, setUser }) {
       setUser(response.data.user);
       onClose();
     } catch (error) {
-      console.log(error);
+      console.log("Popup login error, falling back to redirect:", error);
+      if (
+        error.code === "auth/popup-blocked" ||
+        error.code === "auth/cancelled-popup-request" ||
+        error.code === "auth/popup-closed-by-user"
+      ) {
+        try {
+          await signInWithRedirect(auth, provider);
+        } catch (redirectError) {
+          console.error("Redirect login error:", redirectError);
+        }
+      }
     }
   };
 
