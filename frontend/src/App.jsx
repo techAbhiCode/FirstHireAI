@@ -17,8 +17,9 @@ import { getCurrentUser } from "./api/user.api";
 import { setResume } from "./redux/resumeSlice";
 import { getResume } from "./api/resume.api";
 import { useDispatch } from "react-redux";
-import { getRedirectResult } from "firebase/auth";
-import { auth } from "./utils/firebase";
+
+
+
 
 function App() {
 
@@ -27,29 +28,18 @@ function App() {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const redirectRes = await getRedirectResult(auth);
-        if (redirectRes?.user) {
-          const token = await redirectRes.user.getIdToken();
-          const res = await api.post("/api/auth/login", { token });
-          if (res.data?.sessionId) {
-            localStorage.setItem("sessionId", res.data.sessionId);
-          }
-          setUser(res.data.user);
-          setLoading(false);
-          return;
-        }
-      } catch (redirectErr) {
-        console.warn("No redirect login or error:", redirectErr);
-      }
 
-      const data = await getCurrentUser();
-      setUser(data?.user);
-      setLoading(false);
-    };
+   const getUser = async () => {
+    const data = await getCurrentUser()
+    setUser(data?.user)
 
-    initAuth();
+    setLoading(false)
+
+   }
+   getUser()
+
+  
+
   }, []);
 
   useEffect(() => {

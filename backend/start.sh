@@ -2,7 +2,6 @@
 
 # Save the external port assigned by Render/Cloud (defaults to 8000)
 GATEWAY_PORT=${PORT:-8000}
-export NODE_ENV=${NODE_ENV:-production}
 
 # Configure internal service URLs for the API Gateway
 export AUTH_SERVICE_URL="http://127.0.0.1:8001"

@@ -8,17 +8,19 @@ export const isAuth = async (
 ) => {
 
   try {
-    const authHeader = req.headers.authorization;
-    const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-    const sessionId = req.cookies?.session || bearerToken || req.headers["x-session-id"];
+
+    const sessionId =
+      req.cookies.session;
 
     if (!sessionId) {
+
       return res
         .status(401)
         .json({
           message:
             "Unauthorized",
         });
+
     }
 
     const session =
