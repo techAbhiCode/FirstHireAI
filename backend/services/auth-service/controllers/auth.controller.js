@@ -58,44 +58,45 @@ export const login = async (req, res) => {
 
         interviewCoin:
         user.interviewCoin
-
       }),"EX", 60 * 60 * 24 * 7);
-
-    const isProduction = process.env.NODE_ENV === "production";
 
     res.cookie("session", sessionId, {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24 * 7,
       path: "/",
     });
 
-    return res.json({ success:true,user});
+    return res.json({ success: true, user, sessionId });
 
   } catch (error) {
 
-    return res.status(401).json({ message: error.message, });
+    return res.status(401).json({ message: error.message });
 
   }
 
 };
 
+const getSessionId = (req) => {
+  const authHeader = req.headers?.authorization;
+  const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  return req.cookies?.session || bearerToken || req.headers?.["x-session-id"];
+};
+
 export const logout = async (req, res) => {
   try {
 
-    const sessionId = req.cookies?.session;
+    const sessionId = getSessionId(req);
 
     if (sessionId) {
       await redis.del(`session:${sessionId}`);
     }
 
-    const isProduction = process.env.NODE_ENV === "production";
-
     res.clearCookie("session", {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
       path: "/",
     });
 
@@ -115,11 +116,11 @@ export const logout = async (req, res) => {
 };
 export const useInterviewCoins = async (req, res) => {
   try {
-const sessionId = req.cookies?.session;
+    const sessionId = getSessionId(req);
 
-  const session = await redis.get(`session:${sessionId}`)
+    const session = await redis.get(`session:${sessionId}`)
 
-  const sessionData = JSON.parse(session);
+    const sessionData = JSON.parse(session);
 
     const { coins, action } = req.body;
 
@@ -192,7 +193,7 @@ const sessionId = req.cookies?.session;
 
 export const addCoins = async (req, res) => {
   try {
-    const sessionId = req.cookies?.session;
+    const sessionId = getSessionId(req);
 
     const session = await redis.get(`session:${sessionId}`);
 

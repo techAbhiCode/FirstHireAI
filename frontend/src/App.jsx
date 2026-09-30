@@ -33,6 +33,9 @@ function App() {
         if (redirectRes?.user) {
           const token = await redirectRes.user.getIdToken();
           const res = await api.post("/api/auth/login", { token });
+          if (res.data?.sessionId) {
+            localStorage.setItem("sessionId", res.data.sessionId);
+          }
           setUser(res.data.user);
           setLoading(false);
           return;

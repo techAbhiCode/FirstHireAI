@@ -21,6 +21,9 @@ export function LoginModal({ onClose, setUser }) {
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
       const response = await api.post("/api/auth/login", { token });
+      if (response.data?.sessionId) {
+        localStorage.setItem("sessionId", response.data.sessionId);
+      }
       setUser(response.data.user);
       onClose();
     } catch (error) {

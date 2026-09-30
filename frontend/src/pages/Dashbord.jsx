@@ -82,11 +82,11 @@ export default function Dashboard({ user, setUser }) {
 
   const handleLogout = async () => {
    try {
-     const response = await api.get(
-       "/api/auth/logout");
+      const response = await api.get("/api/auth/logout");
+      localStorage.removeItem("sessionId");
       if (response.data.success) {
         setUser(null);
-      navigate("/");
+        navigate("/");
       }
     } catch (error) {
    console.log(error);
