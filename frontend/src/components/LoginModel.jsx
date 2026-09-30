@@ -7,31 +7,52 @@ import { BiBrain } from "react-icons/bi";
 import { SiKaios } from "react-icons/si";
 import api from "../utils/axios";
 
+import { useState } from "react";
+
 export function LoginModal({ onClose, setUser }) {
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [showRedirectOption, setShowRedirectOption] = useState(false);
 
   const handleGoogleLogin = async () => {
+    setLoading(true);
+    setErrorMsg("");
     try {
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
-      const response = await api.post(
-       "/api/auth/login",
-        { token }
-      );
+      const response = await api.post("/api/auth/login", { token });
       setUser(response.data.user);
       onClose();
     } catch (error) {
-      console.log("Popup login error, falling back to redirect:", error);
+      console.log("Popup login error:", error);
       if (
         error.code === "auth/popup-blocked" ||
         error.code === "auth/cancelled-popup-request" ||
         error.code === "auth/popup-closed-by-user"
       ) {
+        setShowRedirectOption(true);
+        setErrorMsg("Browser ne popup block kiya. Niche diye button se redirect login kijiye.");
+        // Try redirecting automatically
         try {
           await signInWithRedirect(auth, provider);
-        } catch (redirectError) {
-          console.error("Redirect login error:", redirectError);
+        } catch (e) {
+          console.warn("Direct redirect error:", e);
         }
+      } else {
+        setErrorMsg(error.message || "Login failed. Please try again.");
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRedirectLogin = async () => {
+    setLoading(true);
+    try {
+      await signInWithRedirect(auth, provider);
+    } catch (err) {
+      setErrorMsg(err.message || "Redirect failed.");
+      setLoading(false);
     }
   };
 
@@ -91,9 +112,10 @@ export function LoginModal({ onClose, setUser }) {
           </p>
 
           {/* Google */}
-          <div className="mt-7">
+          <div className="mt-7 space-y-3">
             <button
               onClick={handleGoogleLogin}
+              disabled={loading}
               className="
                 w-full
                 flex items-center justify-center gap-3
@@ -103,15 +125,42 @@ export function LoginModal({ onClose, setUser }) {
                 bg-white/10 backdrop-blur-md
                 hover:border-white/25
                 hover:bg-white/[0.14]
+                disabled:opacity-50
                 shadow-inner
                 transition-all
               "
             >
               <FcGoogle size={18} />
               <span className="text-white font-medium text-sm">
-                Continue with Google
+                {loading ? "Signing in..." : "Continue with Google (Popup)"}
               </span>
             </button>
+
+            {showRedirectOption && (
+              <button
+                onClick={handleRedirectLogin}
+                disabled={loading}
+                className="
+                  w-full
+                  flex items-center justify-center gap-3
+                  py-2.5
+                  rounded-xl
+                  border border-amber-400/40
+                  bg-amber-500/20 backdrop-blur-md
+                  hover:bg-amber-500/30
+                  text-amber-200 font-medium text-xs
+                  transition-all
+                "
+              >
+                <span>Popup blocked? Click here for Direct Sign In</span>
+              </button>
+            )}
+
+            {errorMsg && (
+              <p className="text-red-400 text-xs text-center mt-2 px-1">
+                {errorMsg}
+              </p>
+            )}
           </div>
 
         </div>
