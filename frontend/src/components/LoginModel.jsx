@@ -27,22 +27,18 @@ export function LoginModal({ onClose, setUser }) {
       setUser(response.data.user);
       onClose();
     } catch (error) {
-      console.log("Popup login error:", error);
-      if (
-        error.code === "auth/popup-blocked" ||
-        error.code === "auth/cancelled-popup-request" ||
-        error.code === "auth/popup-closed-by-user"
-      ) {
+      console.error("Popup login error:", error);
+      if (error.code === "auth/popup-blocked") {
         setShowRedirectOption(true);
-        setErrorMsg("Browser ne popup block kiya. Niche diye button se redirect login kijiye.");
-        // Try redirecting automatically
-        try {
-          await signInWithRedirect(auth, provider);
-        } catch (e) {
-          console.warn("Direct redirect error:", e);
-        }
+        setErrorMsg("Browser ne popup block kiya. Niche diye button se Direct Sign In kijiye.");
+      } else if (error.code === "auth/unauthorized-domain") {
+        setErrorMsg("Domain Authorized nahi hai: Firebase Console me jakar first-hire-ai.vercel.app add kijiye.");
+      } else if (error.code === "auth/popup-closed-by-user") {
+        setErrorMsg("Google popup band kar diya gaya. Dobara click karke account choose kijiye.");
+      } else if (error.code === "auth/cancelled-popup-request") {
+        setErrorMsg("Login request cancel ho gayi. Dobara koshish kijiye.");
       } else {
-        setErrorMsg(error.message || "Login failed. Please try again.");
+        setErrorMsg(`${error.code || 'Error'}: ${error.message || 'Login failed'}`);
       }
     } finally {
       setLoading(false);
