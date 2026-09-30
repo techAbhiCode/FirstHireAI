@@ -31,13 +31,22 @@ echo "1. Starting Auth Service on :8001..."
 PORT=8001 MONGODB_URL="${AUTH_MONGO:-$MONGODB_URL}" node services/auth-service/index.js &
 
 echo "2. Starting Interview Service on :8002..."
-PORT=8002 MONGODB_URL="${INTERVIEW_MONGO:-$MONGODB_URL}" node services/interview-service/index.js &
+PORT=8002 \
+MONGODB_URL="${INTERVIEW_MONGO:-$MONGODB_URL}" \
+GROQ_API_KEY="${INTERVIEW_GROQ_API_KEY:-$GROQ_API_KEY}" \
+node services/interview-service/index.js &
 
 echo "3. Starting Resume Service on :8003..."
-PORT=8003 MONGODB_URL="${RESUME_MONGO:-$MONGODB_URL}" node services/resume-service/index.js &
+PORT=8003 \
+MONGODB_URL="${RESUME_MONGO:-$MONGODB_URL}" \
+GROQ_API_KEY="${RESUME_GROQ_API_KEY:-$GROQ_API_KEY}" \
+node services/resume-service/index.js &
 
 echo "4. Starting Roadmap Service on :8004..."
-PORT=8004 MONGODB_URL="${ROADMAP_MONGO:-$MONGODB_URL}" node services/roadmap-service/index.js &
+PORT=8004 \
+MONGODB_URL="${ROADMAP_MONGO:-$MONGODB_URL}" \
+GROQ_API_KEY="${ROADMAP_GROQ_API_KEY:-$GROQ_API_KEY}" \
+node services/roadmap-service/index.js &
 
 echo "5. Starting Billing Service on :8005..."
 PORT=8005 MONGODB_URL="${BILLING_MONGO:-$MONGODB_URL}" node services/billing-service/index.js &
